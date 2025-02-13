@@ -1,2 +1,2 @@
 # MapReduce
-This is my implementation of MadReduce method.
+This is my implementation of MadReduce programming model.
