@@ -11,14 +11,8 @@ We always have to preprocess data for map:
 Master()
 
 -> Starts a reader
-        Reader() -> opens the file in format:
-                  N
-                  k1 -> name for file with k1
-                  ...
-                  kn -> name for file with kn
-                  v1 -> name for file with v1
-                  ...
-                  vn -> name for file with v2
+        Reader() -> opens the file that contains
+                 a json with key value pairs
                  -> reads the keys and values as strings using reader threads
                  -> let reader thread divide values into smaller chunks in case the data is too big
                  -> Use CSV in order to separate the data into chunks of size of 1 KB or something like this (can be a constant)
