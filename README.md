@@ -43,3 +43,12 @@ Interaction between Map threads and Reduce threads happens using the queues in w
                  2) Map phase
                  3) Reduce phase
                  4) See where code can be optimized
+
+## Plan 18.02
+
+- Define Error class
+- Provide definitions for Map and Reduce 
+- Declare Reader class
+- Declare Do_Map class
+- Declare Do_Reduce class
+- Try to compile

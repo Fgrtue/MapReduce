@@ -9,14 +9,14 @@
 // -> Destructor 
 //      -> joins them
 // 2. Constructor
-//  -> Takes integer as input, as well as the queue with work
-//  -> Takes a vector of queues
-//  -> Each queue is a class ConQueue
-//      -> there is lock for it, and a cond var
-//      -> with corresponding methods push and pop
+//  -> Takes integer as input, as well as the queue with work,
+//      -> ConQueues for map
+//      -> ConQueues for reducers
+//      -> hash function for mapper
+//      -> hash function for reducers
 //  -> It creates a vector of workers
 //          -> each worker is a thread
-//          -> We provide it the above vector of queues
+//          -> We provide it the above vectors of queues
 //                 -> and index of the thread (for getting the first queue)
 //          -> Each worker has a storage for saving finished work
 //          -> and a method for sorting (using the provided function)
@@ -24,8 +24,8 @@
 //             -> which inside uses fuction Map() defined by user
 //          -> and a method for Send()
 //  3. Do_work()
-//  -> The main thread just fills the queue of all the threads
-//      -> taking the work from the obtained queue in the constructor
+//  -> The main thread takes jobs from general queue of tasks and fills queues for each worker
+//      -> using hash function for mappers
 //  4. Destructor
 //  -> In the destructor we have to wait for all the threads
 //  -> and join them!
@@ -34,8 +34,9 @@
 // 1. It has
 //      -> Constructor
 //          -> that takes a reference to the vector
-//          -> of ConQueues
+//          -> of ConQueues for map and for reducers
 //          -> and an index to its number
+//          -> also takes the hash function
 //      -> Member queue for storing the results
 //      -> the maximum number of task to start sending them
 //      -> a hash function for communucating with Reducers

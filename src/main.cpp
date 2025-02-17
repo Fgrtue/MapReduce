@@ -1,5 +1,13 @@
 // This is the main file, where map reduce gets started
 
+#include "../include/commons.hpp"
+#include "../include/ConQueue.hpp"
+#include "../include/error.hpp"
+#include "../include/Reader.hpp"
+#include "../include/DoMap.hpp"
+#include "../include/DoReduce.hpp"
+#include "../include/map_reduce_functions.hpp"
+
 // 1. Read the input as the name of the file
 // -> pass the value to reader
 // -> let reader output key value pairs (hash map)
@@ -9,7 +17,7 @@
 // -> Compute the number of reducers 
 // -> Create a vector of ConQueues for reducers
 //      -> let the number be something like a nultiple of tasks
-//      -> We'd better have less map workers than threads
+//      -> We'd better have less map workers than tasks
 // 3. Create Reduce class, providing it
 //      -> number of reducers
 //      -> vector of Conqueue for Reduce workers
@@ -26,3 +34,58 @@
 //  That would allow us to make sure that all Map workers are done when we
 //  Wake up all threads in Reduce before destruction!
 // -> the output will be saved in a number of files, each written by reducer
+
+void Error(Err,const char*);
+
+using std::string;
+using std::queue;
+using std::vector;
+using std::pair;
+using std::array;
+
+using UserMap = Map<std::string, int>;
+using UserReduce = Reduce<std::string, int>;
+
+using map_queue    = ConQueue<pair<UserMap::Key, UserMap::Value>>;
+using reduce_queue = ConQueue<pair<UserReduce::Key, UserReduce::Value>>;
+
+constexpr double map_coefficient = 100;
+constexpr double reduce_coefficient = 2.5;
+constexpr int    number_of_cores  = 8;
+constexpr int    parallelism_map  = static_cast<int>(map_coefficient * number_of_cores);
+constexpr int    parallelism_reduce  = static_cast<int>(reduce_coefficient * number_of_cores);
+
+int main(int argc, char* argv[]) {
+
+    if (argc != 2) {
+        // Create error class
+        Error(Err::PARSING, "must be 2 arguments");
+    }
+    string file_name{argv[1]};
+    // check that file name is in .json format
+    if (file_name.substr(file_name.size() - 5, 5) != ".json") {
+        Error(Err::PARSING, "file must be in .json format");
+    }
+
+    UserMap map_function;
+    UserReduce reduce_function;
+
+    // Hash Functions
+
+    auto hash_reducer = [](const UserReduce::Key& key) {
+        static std::hash<UserReduce::Key> hasher;
+        return hasher(key) % parallelism_reduce;
+    };
+
+    auto hash_mapper = [](const string& key) {
+        static std::hash<string> hasher;
+        return hasher(key) % parallelism_map;
+    };
+
+    queue<string, pair<string,string>> jobs = Reader(file_name);
+    vector<reduce_queue>   reduce_queues(parallelism_reduce);
+    vector<map_queue>       map_queues(parallelism_map);
+
+    DoReduce(parallelism_reduce, reduce_queues, hash_reducer);
+    DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_mapper, hash_reducer);
+}

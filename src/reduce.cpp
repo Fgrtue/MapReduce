@@ -9,7 +9,8 @@
 //      -> Creates Reducers threads, calling a constructor for reduce
 //      -> providing every reducer its queue for jobs
 // 3. Destructor
-//      -> sets map finish
+//      -> takes the lock to the map_finish
+//      -> sets work_finish
 //      -> walks through all the queues, gets the lock and wakes up all threads
 //      -> Joins all reducer threads
 // class ReduceWorker
@@ -24,6 +25,7 @@
 //              -> if not, takes and pops the next value
 //              -> Releases the lock
 //              -> Uses Reduce() (defined by user)
-//              -> writes to the file that it created 
+//              -> writes to the file that it created
+//         -> takes the lock 
 //         ->  checks map_finish variable
 //              -> returns if it is true
