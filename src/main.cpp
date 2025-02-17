@@ -5,13 +5,24 @@
 // -> let reader output key value pairs (hash map)
 // 2. Depending on the total number of values, 
 // -> decide how many map workers you would need
-// 3. Use hash function to map each function to the queue
-// -> for the mappers 
-// 4. After all the tasks are assigned, go to starting reduce threads
-// -> observe, that all the constructors must have been called by that
-// -> time, meaning that there must be already the queues, where we shall put the
-// tasks
-// -> the key and value within a queue is defined by user when defining Map and Reduce
-// functions
-// 5. Then wait for all threads to finish
+// -> Create the vector of ConQueues for each map worker
+// -> Compute the number of reducers 
+// -> Create a vector of ConQueues for reducers
+//      -> let the number be something like a nultiple of tasks
+//      -> We'd better have less map workers than threads
+// 3. Create Reduce class, providing it
+//      -> number of reducers
+//      -> vector of Conqueue for Reduce workers
+//      -> hash function for Reducers
+// 4. Create Map class, providing it 
+//      -> number of mappers, 
+//      -> queue of tasks,
+//      -> vector of ConQueue for Map workers
+//      -> vector of Conqueue for Reduce workers
+//      -> hash function for Map
+//      -> hash function for Reducers
+// !Observer that it is important to create Reducers before Map
+// Since it will allow to destroy Map before Reducers (using LIFO order)
+//  That would allow us to make sure that all Map workers are done when we
+//  Wake up all threads in Reduce before destruction!
 // -> the output will be saved in a number of files, each written by reducer
