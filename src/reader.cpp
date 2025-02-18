@@ -1,3 +1,5 @@
+#include "reader.hpp"
+#include "error.hpp"
 
 // 1. Reader gets name of input file
 // 2. We assume that input is in JSON format,
@@ -12,3 +14,30 @@
 // -> IT is actually better not to lose the original key, and
 // -> keep in hash map key,value pair 
 // 5. Return to queue to the main
+
+void Error(Err,const char*);
+
+Reader::Reader(const string& s) {
+    input_file.open(s, std::ios_base::in);
+    if (!input_file.is_open()) {
+            Error(Err::PARSING, "couldn't open the file");
+    }
+}
+
+queue<tuple<string,string,string>> Reader::parse() {
+
+    queue<tuple<string,string,string>> res; 
+    json data = json::parse(input_file);
+    
+    for(auto& [key, value] : data) {
+
+        if (value.is_string()) {
+                
+            if()
+
+        } else {
+            Error(Err::PARSING, "values must be of string type");
+        }
+
+    }
+}

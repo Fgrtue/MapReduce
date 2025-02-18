@@ -1,5 +1,6 @@
+#pragma once
+
 #include "commons.hpp"
-#include <exception>
 
 enum class Err {
 

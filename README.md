@@ -46,9 +46,13 @@ Interaction between Map threads and Reduce threads happens using the queues in w
 
 ## Plan 18.02
 
-- Define Error class
-- Provide definitions for Map and Reduce 
-- Declare Reader class
-- Declare Do_Map class
-- Declare Do_Reduce class
-- Try to compile
+- Define Error class ✔️
+- Provide definitions for Map and Reduce ✔️
+- Declare Reader class ✔️
+- Declare Do_Map class ✔️
+- Declare Do_Reduce class ✔️ 
+- Write a Make File ✔️
+
+- Write ConQueue 
+- Write Read class
+- Test them

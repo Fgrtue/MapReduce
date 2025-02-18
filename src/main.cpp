@@ -1,12 +1,12 @@
 // This is the main file, where map reduce gets started
 
 #include "../include/commons.hpp"
-#include "../include/ConQueue.hpp"
+#include "../include/reader.hpp"
+#include "../include/do-map.hpp"
+#include "../include/do-reduce.hpp"
+#include "../include/map-reduce-user.hpp"
+#include "../include/con-queue.hpp"
 #include "../include/error.hpp"
-#include "../include/Reader.hpp"
-#include "../include/DoMap.hpp"
-#include "../include/DoReduce.hpp"
-#include "../include/map_reduce_functions.hpp"
 
 // 1. Read the input as the name of the file
 // -> pass the value to reader
@@ -37,18 +37,6 @@
 
 void Error(Err,const char*);
 
-using std::string;
-using std::queue;
-using std::vector;
-using std::pair;
-using std::array;
-
-using UserMap = Map<std::string, int>;
-using UserReduce = Reduce<std::string, int>;
-
-using map_queue    = ConQueue<pair<UserMap::Key, UserMap::Value>>;
-using reduce_queue = ConQueue<pair<UserReduce::Key, UserReduce::Value>>;
-
 constexpr double map_coefficient = 100;
 constexpr double reduce_coefficient = 2.5;
 constexpr int    number_of_cores  = 8;
@@ -63,12 +51,12 @@ int main(int argc, char* argv[]) {
     }
     string file_name{argv[1]};
     // check that file name is in .json format
-    if (file_name.substr(file_name.size() - 5, 5) != ".json") {
+    if (file_name.size() <= 5 || file_name.substr(file_name.size() - 5, 5) != ".json") {
         Error(Err::PARSING, "file must be in .json format");
     }
 
-    UserMap map_function;
-    UserReduce reduce_function;
+    UserMap     map_function;
+    UserReduce  reduce_function;
 
     // Hash Functions
 
@@ -82,10 +70,12 @@ int main(int argc, char* argv[]) {
         return hasher(key) % parallelism_map;
     };
 
-    queue<string, pair<string,string>> jobs = Reader(file_name);
+    Reader reader(file_name);
+
+    queue<tuple<string,string,string>> jobs = reader.parse(); 
     vector<reduce_queue>   reduce_queues(parallelism_reduce);
     vector<map_queue>       map_queues(parallelism_map);
 
-    DoReduce(parallelism_reduce, reduce_queues, hash_reducer);
-    DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_mapper, hash_reducer);
+    DoReduce(parallelism_reduce, reduce_queues, hash_reducer, reduce_function);
+    DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_mapper, hash_reducer, map_function);
 }
