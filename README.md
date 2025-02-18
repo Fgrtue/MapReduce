@@ -53,6 +53,11 @@ Interaction between Map threads and Reduce threads happens using the queues in w
 - Declare Do_Reduce class ✔️ 
 - Write a Make File ✔️
 
-- Write ConQueue 
+- Write ConQueue ✔️
 - Write Read class
+        - check the library for parsing jsons
+        - find out what does parse function do
+        - what output does it give
+        - how to get the string from the values
+        - what would be the complexity of the tasks 
 - Test them
