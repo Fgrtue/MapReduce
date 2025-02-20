@@ -10,9 +10,8 @@ private:
 
 public:
 
-    DoMap(int, int, queue<tuple<string,string,string>>&, 
-            vector<map_queue>, vector<reduce_queue>, 
-            std::function<int(string)>, 
+    DoMap(int, int, queue<pair<string,string>>&, 
+            vector<map_queue>&, vector<reduce_queue>&, 
             std::function<int(UserReduce::Key)>,
             UserMap);
 

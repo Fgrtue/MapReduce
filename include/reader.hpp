@@ -16,8 +16,10 @@ class Reader {
 
 private:
 
-    static constexpr int CHUNK_SIZE = 1024;
-    std::ifstream input_file;
+    size_t choose_size(size_t, const string&);
+
+    static constexpr size_t CHUNK_SIZE = 1024;
+    std::fstream input_file;
 
 public:
 
@@ -28,5 +30,6 @@ public:
 
     // Read the content of the file
     // By splitting them in chunks of 1KB
-    queue<tuple<string,string,string>> parse();
+    queue<pair<string,string>> parse();
+
 };

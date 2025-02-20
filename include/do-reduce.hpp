@@ -10,7 +10,7 @@ private:
 
 public:
 
-    DoReduce(int, vector<reduce_queue>, 
+    DoReduce(int, vector<reduce_queue>&, 
              std::function<int(UserReduce::Key)> hash_reduce,
              UserReduce);
 

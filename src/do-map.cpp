@@ -96,9 +96,8 @@
 // -> happens under the lock
 // -> the methods are thus trivial
 
-DoMap::DoMap(int a, int b, queue<tuple<string,string,string>>& c, 
-            vector<map_queue> d, vector<reduce_queue> e, 
-            std::function<int(string)> hash_map, 
+DoMap::DoMap(int a, int b, queue<pair<string,string>>& c, 
+            vector<map_queue>& d, vector<reduce_queue>& e, 
             std::function<int(UserReduce::Key)> hash_reduce,
             UserMap i) 
 {

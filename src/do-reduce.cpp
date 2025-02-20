@@ -31,7 +31,7 @@
 //         ->  checks map_finish variable
 //              -> returns if it is true
 
-DoReduce::DoReduce(int a, vector<reduce_queue> b, 
+DoReduce::DoReduce(int a, vector<reduce_queue>& b, 
              std::function<int(UserReduce::Key)> hash_reduce,
              UserReduce d)
 {

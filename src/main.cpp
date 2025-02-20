@@ -1,12 +1,12 @@
 // This is the main file, where map reduce gets started
 
-#include "../include/commons.hpp"
-#include "../include/reader.hpp"
-#include "../include/do-map.hpp"
-#include "../include/do-reduce.hpp"
-#include "../include/map-reduce-user.hpp"
-#include "../include/con-queue.hpp"
-#include "../include/error.hpp"
+#include "commons.hpp"
+#include "reader.hpp"
+#include "do-map.hpp"
+#include "do-reduce.hpp"
+#include "map-reduce-user.hpp"
+#include "con-queue.hpp"
+#include "error.hpp"
 
 // 1. Read the input as the name of the file
 // -> pass the value to reader
@@ -65,17 +65,12 @@ int main(int argc, char* argv[]) {
         return hasher(key) % parallelism_reduce;
     };
 
-    auto hash_mapper = [](const string& key) {
-        static std::hash<string> hasher;
-        return hasher(key) % parallelism_map;
-    };
-
     Reader reader(file_name);
 
-    queue<tuple<string,string,string>> jobs = reader.parse(); 
+    queue<pair<string,string>> jobs = reader.parse(); 
     vector<reduce_queue>   reduce_queues(parallelism_reduce);
     vector<map_queue>       map_queues(parallelism_map);
 
     DoReduce(parallelism_reduce, reduce_queues, hash_reducer, reduce_function);
-    DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_mapper, hash_reducer, map_function);
+    DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer, map_function);
 }
