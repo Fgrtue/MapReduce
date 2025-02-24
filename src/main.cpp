@@ -72,6 +72,6 @@ int main(int argc, char* argv[]) {
     vector<reduce_queue>   reduce_queues(parallelism_reduce);
     vector<map_queue>       map_queues(parallelism_map);
 
-    DoReduce(parallelism_reduce, reduce_queues, hash_reducer, reduce_function);
+    DoReduce(parallelism_reduce, &reduce_queues, hash_reducer, reduce_function);
     DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer, map_function);
 }

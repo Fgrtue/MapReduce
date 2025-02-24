@@ -61,3 +61,6 @@ add_executable(map-reduce src/main.cpp)
 target_include_directories(map-reduce PUBLIC include)
 
 target_link_libraries(map-reduce PRIVATE ${PROJECT_NAME})
+
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)

@@ -14,6 +14,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <functional>
 
 using std::string;
 using std::queue;

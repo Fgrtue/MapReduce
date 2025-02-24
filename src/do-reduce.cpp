@@ -33,15 +33,17 @@
 
 void Error(Err er_num, const char* msg);
 
+
 DoReduce::DoReduce(int num_reducers, vector<reduce_queue>* reduce_ques, 
              std::function<int(UserReduce::Key)> hash_reduce,
              UserReduce reduce_func_)
              : num_reducers_(num_reducers)
-             , vec_map_finished_(num_reducers_, false)
+             , vec_map_finished_(num_reducers_)
              , reduce_ques_(reduce_ques)
 {   
     for(int i=0;i<num_reducers;++i) {
-        rdsrs_.emplace_back(reduction_worker, i,(*reduce_ques_)[i], reduce_func_, vec_map_finished_[i]);
+        vec_map_finished_[i].store(false);
+        rdsrs_.emplace_back(&DoReduce::reduction_worker, this, i, std::ref((*reduce_ques_)[i]), reduce_func_, std::ref(vec_map_finished_[i]));
     }
 }
 
@@ -50,7 +52,7 @@ DoReduce::~DoReduce() {
     for(int i=0;i<num_reducers_;i++) {
         reduce_queue& q = (*reduce_ques_)[i];
         std::lock_guard lg_(q.mt_);
-        vec_map_finished_[i] = true;
+        vec_map_finished_[i].store(true);
         q.cv_empty_.notify_one();
     }
     for(int i=0;i<num_reducers_;i++) {
@@ -58,7 +60,7 @@ DoReduce::~DoReduce() {
     }
 }
 
-void reduction_worker(int num_rds, reduce_queue& q, UserReduce reduce_func_, bool* map_fin) {
+void DoReduce::reduction_worker(int num_rds, reduce_queue& q, UserReduce reduce_func_, std::atomic<bool>& map_fin) {
 
     string name_file = "reduction_" + std::to_string(num_rds);
     std::ofstream file_reduce(name_file);
@@ -72,8 +74,8 @@ void reduction_worker(int num_rds, reduce_queue& q, UserReduce reduce_func_, boo
         std::unique_lock<std::mutex> ul_(q.mt_);
         // wait on cv, in case map is still doing its work
         // and q is not empty
-        q.cv_empty_.wait(ul_, [map_fin, &q]() {
-            return (*map_fin == true && !q.empty());
+        q.cv_empty_.wait(ul_, [&map_fin, &q]() {
+            return (map_fin.load() && !q.empty());
         });
         if (!q.empty()) {
             auto p = q.pop();
@@ -84,7 +86,7 @@ void reduction_worker(int num_rds, reduce_queue& q, UserReduce reduce_func_, boo
             file_reduce << output.first << " " << output.second << "\n";
             ul_.lock();
         }
-        if (*map_fin == true) {
+        if (map_fin.load()) {
             break;
         }
     }
