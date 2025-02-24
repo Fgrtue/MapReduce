@@ -4,7 +4,6 @@
 #include <gtest/gtest.h>
 
 /*
-
     TEST CASES
 
     1. Constructor not succesfull
@@ -17,7 +16,6 @@
         -> of values smaller than chunk size
     6. parse file : Successfull parsing
         -> of values larger than chunk size
-
 */
 
 TEST(Constructor, Fail) {

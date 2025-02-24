@@ -28,6 +28,10 @@ struct ConQueue {
 
     // Check for emptiness
     bool empty();
+
+    ConQueue() = default;
+    ConQueue(const ConQueue&) = delete; 
+    ConQueue& operator=(const ConQueue&) = delete;
 };
 
 template<class T>

@@ -12,14 +12,13 @@ private:
     int                   num_reducers_;
     vector<std::atomic<bool>>          vec_map_finished_;
     vector<std::thread>   rdsrs_;
-    vector<reduce_queue> *reduce_ques_;
+    vector<std::unique_ptr<reduce_queue>> *reduce_ques_;
 
-    void reduction_worker(int, reduce_queue&, UserReduce, std::atomic<bool>&);
+    void reduction_worker(int, reduce_queue*, UserReduce, std::atomic<bool>&);
 
 public:
 
-    DoReduce(int, vector<reduce_queue>*, 
-             std::function<int(UserReduce::Key)> hash_reduce,
+    DoReduce(int, vector<std::unique_ptr<reduce_queue>>*,
              UserReduce);
 
     ~DoReduce();

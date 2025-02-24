@@ -6,3 +6,10 @@ target_link_libraries(test_reader PRIVATE
     gtest_main
     MapReduce
 )
+
+add_executable(test_reduce test_reduce.cpp)
+
+target_link_libraries(test_reduce PRIVATE
+    gtest_main
+    MapReduce
+)

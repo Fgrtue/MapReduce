@@ -97,7 +97,8 @@
 // -> the methods are thus trivial
 
 DoMap::DoMap(int a, int b, queue<pair<string,string>>& c, 
-            vector<map_queue>& d, vector<reduce_queue>& e, 
+            vector<std::unique_ptr<map_queue>>* d, 
+            vector<std::unique_ptr<reduce_queue>>* e, 
             std::function<int(UserReduce::Key)> hash_reduce,
             UserMap i) 
 {

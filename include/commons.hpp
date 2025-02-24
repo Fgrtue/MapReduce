@@ -15,6 +15,10 @@
 #include <condition_variable>
 #include <atomic>
 #include <functional>
+#include <memory>
+#include <unordered_map>
+#include <map>
+
 
 using std::string;
 using std::queue;

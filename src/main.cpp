@@ -69,9 +69,15 @@ int main(int argc, char* argv[]) {
     queue<pair<string,string>> jobs = reader.parse(); 
     
     // we will store vector of values for a specific key
-    vector<reduce_queue>   reduce_queues(parallelism_reduce);
-    vector<map_queue>       map_queues(parallelism_map);
+    vector<std::unique_ptr<reduce_queue>>   reduce_queues;
+    for(int i=0;i<parallelism_reduce;++i) {
+        reduce_queues.emplace_back(std::make_unique<reduce_queue>());
+    }
+    vector<std::unique_ptr<map_queue>>       map_queues;
+    for(int i=0;i<parallelism_map;++i) {
+        map_queues.emplace_back(std::make_unique<map_queue>());
+    }
 
-    DoReduce(parallelism_reduce, &reduce_queues, hash_reducer, reduce_function);
-    DoMap(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer, map_function);
+    DoReduce reduction_process(parallelism_reduce, &reduce_queues, reduce_function);
+    DoMap map_process(parallelism_map, parallelism_reduce, jobs, &map_queues, &reduce_queues, hash_reducer, map_function);
 }

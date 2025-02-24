@@ -27,12 +27,24 @@ public:
     using Key   = K;
     using Value = V;
 
-    pair<Key, Value> operator() (const Key& key, const vector<Value>& vec_values) {
-        std::cout << key;
-        for(auto elem : vec_values) {
-            std::cout << elem;
+    void operator() (const Key& key, const vector<Value>& vec_values) {
+        for(auto& elem : vec_values) {
+            storage[key] += elem;
         }
     }
+
+    vector<pair<int,Value>> get_values() {
+        vector<pair<int,Value>> data;
+        for(auto [key, value] : storage) {
+            data.emplace_back(std::stoi(key),value);
+        }
+        std::sort(data.begin(), data.end());
+        return data;
+    }
+
+private:
+
+    std::unordered_map<Key,Value> storage;
 
 };
 

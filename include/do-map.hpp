@@ -11,7 +11,8 @@ private:
 public:
 
     DoMap(int, int, queue<pair<string,string>>&, 
-            vector<map_queue>&, vector<reduce_queue>&, 
+            vector<std::unique_ptr<map_queue>>*, 
+            vector<std::unique_ptr<reduce_queue>>*, 
             std::function<int(UserReduce::Key)>,
             UserMap);
 
