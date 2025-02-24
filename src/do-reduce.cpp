@@ -11,7 +11,7 @@
 //      -> providing every reducer its queue for jobs
 // 3. Destructor
 //      -> takes the lock to the map_finish
-//      -> sets work_finish
+//      -> sets map_finish
 //      -> walks through all the queues, gets the lock and wakes up all threads
 //      -> Joins all reducer threads
 // class ReduceWorker
@@ -31,9 +31,61 @@
 //         ->  checks map_finish variable
 //              -> returns if it is true
 
-DoReduce::DoReduce(int a, vector<reduce_queue>& b, 
+void Error(Err er_num, const char* msg);
+
+DoReduce::DoReduce(int num_reducers, vector<reduce_queue>* reduce_ques, 
              std::function<int(UserReduce::Key)> hash_reduce,
-             UserReduce d)
-{
-    
+             UserReduce reduce_func_)
+             : num_reducers_(num_reducers)
+             , vec_map_finished_(num_reducers_, false)
+             , reduce_ques_(reduce_ques)
+{   
+    for(int i=0;i<num_reducers;++i) {
+        rdsrs_.emplace_back(reduction_worker, i,(*reduce_ques_)[i], reduce_func_, vec_map_finished_[i]);
+    }
+}
+
+DoReduce::~DoReduce() {
+
+    for(int i=0;i<num_reducers_;i++) {
+        reduce_queue& q = (*reduce_ques_)[i];
+        std::lock_guard lg_(q.mt_);
+        vec_map_finished_[i] = true;
+        q.cv_empty_.notify_one();
+    }
+    for(int i=0;i<num_reducers_;i++) {
+        rdsrs_[i].join();
+    }
+}
+
+void reduction_worker(int num_rds, reduce_queue& q, UserReduce reduce_func_, bool* map_fin) {
+
+    string name_file = "reduction_" + std::to_string(num_rds);
+    std::ofstream file_reduce(name_file);
+    if (!file_reduce) {
+        string msg = "failed create a file for reducer " + std::to_string(num_rds);
+        Error(Err::REDUCE, &msg[0]);
+    }
+
+    while(true) {
+
+        std::unique_lock<std::mutex> ul_(q.mt_);
+        // wait on cv, in case map is still doing its work
+        // and q is not empty
+        q.cv_empty_.wait(ul_, [map_fin, &q]() {
+            return (*map_fin == true && !q.empty());
+        });
+        if (!q.empty()) {
+            auto p = q.pop();
+            auto& key = p.first;
+            auto& val = p.second;
+            ul_.unlock();
+            auto output = reduce_func_(key, val);
+            file_reduce << output.first << " " << output.second << "\n";
+            ul_.lock();
+        }
+        if (*map_fin == true) {
+            break;
+        }
+    }
 }

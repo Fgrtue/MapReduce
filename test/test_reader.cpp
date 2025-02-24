@@ -22,7 +22,7 @@
 
 TEST(Constructor, Fail) {
 
-    std::string file_name = "/home/kkopnev/MapReduce/test/foo";
+    std::string file_name = "../test/foo";
     try {
         Reader reader(file_name);
         EXPECT_TRUE(false);
@@ -35,7 +35,7 @@ TEST(Constructor, Fail) {
 
 TEST(Constructor, Success) {
 
-    std::string file_name = "/home/kkopnev/MapReduce/test/reader_test1.json";
+    std::string file_name = "../test/reader_test1.json";
     try {
         Reader reader(file_name);
         EXPECT_TRUE(true);
@@ -46,7 +46,7 @@ TEST(Constructor, Success) {
 
 TEST(Parser, ErrorFormat) {
 
-    std::string file_name = "/home/kkopnev/MapReduce/test/reader_test1.json";
+    std::string file_name = "../test/reader_test1.json";
     try {
         Reader reader(file_name);
         reader.parse();
@@ -60,7 +60,7 @@ TEST(Parser, ErrorFormat) {
 
 TEST(Parser, FormatShort) {
 
-    std::string file_name = "/home/kkopnev/MapReduce/test/reader_test2.json";
+    std::string file_name = "../test/reader_test2.json";
     try {
         Reader reader(file_name);
         auto q = reader.parse();
@@ -85,7 +85,7 @@ TEST(Parser, FormatShort) {
 
 TEST(Parser, FormatLong) {
 
-    std::string file_name = "/home/kkopnev/MapReduce/test/reader_test3.json";
+    std::string file_name = "../test/reader_test3.json";
     try {
         Reader reader(file_name);
         auto q = reader.parse();

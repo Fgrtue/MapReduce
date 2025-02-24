@@ -4,7 +4,9 @@
 
 enum class Err {
 
-    PARSING
+    PARSING,
+
+    REDUCE
 };
 
 

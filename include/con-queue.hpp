@@ -17,7 +17,7 @@ template<class T>
 struct ConQueue {
 
     mutable std::mutex mt_;
-    std::condition_variable empty_;
+    std::condition_variable cv_empty_;
     queue<T> data_;
 
     // Puts a value in the queue

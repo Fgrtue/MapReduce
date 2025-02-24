@@ -58,8 +58,7 @@ int main(int argc, char* argv[]) {
     UserMap     map_function;
     UserReduce  reduce_function;
 
-    // Hash Functions
-
+    // Hash Function
     auto hash_reducer = [](const UserReduce::Key& key) {
         static std::hash<UserReduce::Key> hasher;
         return hasher(key) % parallelism_reduce;
@@ -68,6 +67,8 @@ int main(int argc, char* argv[]) {
     Reader reader(file_name);
 
     queue<pair<string,string>> jobs = reader.parse(); 
+    
+    // we will store vector of values for a specific key
     vector<reduce_queue>   reduce_queues(parallelism_reduce);
     vector<map_queue>       map_queues(parallelism_map);
 

@@ -40,4 +40,4 @@ using UserMap = Map<std::string, int>;
 using UserReduce = Reduce<std::string, int>;
 
 using map_queue    = ConQueue<pair<UserMap::Key, UserMap::Value>>;
-using reduce_queue = ConQueue<pair<UserReduce::Key, UserReduce::Value>>;
+using reduce_queue = ConQueue<pair<UserReduce::Key, vector<UserReduce::Value>>>;
