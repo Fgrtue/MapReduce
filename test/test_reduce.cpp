@@ -30,16 +30,13 @@ TEST(Reducer, OneTwo) {
     // 6. Send them both to reducer 1 and reducer 2 using the lock in the queue
 
     int num_reduce = 2;
-    vector<std::unique_ptr<reduce_queue>> reduce_ques;
+    std::shared_ptr<vector<reduce_queue>>    reduce_ques(std::make_shared<vector<reduce_queue>>(num_reduce));
     UserReduce reduce_function;
 
-    for(int i=0;i<num_reduce;++i) {
-        reduce_ques.emplace_back(std::make_unique<reduce_queue>());
-    }
     int num_keys = 100;
     int num_val = 100;
     {
-        DoReduce reduction_process(num_reduce, &reduce_ques, reduce_function);    
+        DoReduce reduction_process(num_reduce, reduce_ques, reduce_function);    
         vector<vector<int>> data(num_keys);
         for(int key=0;key<num_keys;++key) {
             for(int j=0;j<num_val;++j) {
@@ -49,10 +46,10 @@ TEST(Reducer, OneTwo) {
         for(int key=0;key<num_keys;++key) {
             string str = std::to_string(key);
             for(int t=0; t<num_reduce;++t) {
-                reduce_queue*  q = reduce_ques[t].get();
-                std::lock_guard lk_(q->mt_);
-                q->push(std::make_pair(str, data[key]));
-                q->cv_empty_.notify_one();
+                reduce_queue&  q = (*reduce_ques)[t];
+                std::lock_guard lk_(q.mt_);
+                q.push(std::make_pair(str, data[key]));
+                q.cv_empty_.notify_one();
             }
         }
     }
@@ -60,10 +57,17 @@ TEST(Reducer, OneTwo) {
     for (int r=0;r<num_reduce;++r) {
         string file_name = "reduction_" + std::to_string(r);
         std::fstream file(file_name);
+        vector<pair<int, int>> storage;
         for(int k=0;k<num_keys;++k) {
             int key;
             int val;
             file >> key >> val;
+            storage.emplace_back(key,val);
+        }
+        std::sort(storage.begin(), storage.end());
+        for(int k=0;k<num_keys;++k) {
+            int key = storage[k].first;
+            int val = storage[k].second;
             EXPECT_EQ(key, k);
             EXPECT_EQ(val, num_val);
         }
@@ -71,7 +75,7 @@ TEST(Reducer, OneTwo) {
 }
 
 void fill_data(int num_reduce, int num_keys, int num_val, 
-    vector<std::unique_ptr<reduce_queue>>* reduce_ques) {
+    std::shared_ptr<vector<reduce_queue>> reduce_ques) {
     vector<vector<int>> data(num_keys);
     for(int key=0;key<num_keys;++key) {
         for(int j=0;j<num_val;++j) {
@@ -80,10 +84,10 @@ void fill_data(int num_reduce, int num_keys, int num_val,
     }
         for(int key=0;key<num_keys;++key) {
             string str = std::to_string(key);
-            reduce_queue*  q = (*reduce_ques)[key%num_reduce].get();
-            std::lock_guard lk_(q->mt_);
-            q->push(std::make_pair(str, data[key]));
-            q->cv_empty_.notify_one();
+            reduce_queue&  q = (*reduce_ques)[key%num_reduce];
+            std::lock_guard lk_(q.mt_);
+            q.push(std::make_pair(str, data[key]));
+            q.cv_empty_.notify_one();
         }
 }
 
@@ -91,38 +95,41 @@ TEST(Reducer, TwoTwo) {
 
     int num_producers = 2;
     int num_reduce = 2;
-    vector<std::unique_ptr<reduce_queue>> reduce_ques;
+    std::shared_ptr<vector<reduce_queue>>    reduce_ques(std::make_shared<vector<reduce_queue>>(num_reduce));
     UserReduce reduce_function;
 
-    for(int i=0;i<num_reduce;++i) {
-        reduce_ques.emplace_back(std::make_unique<reduce_queue>());
-    }
     int num_keys = 100;
     int num_val = 100;
     {
-        DoReduce reduction_process(num_reduce, &reduce_ques, reduce_function);    
+        DoReduce reduction_process(num_reduce, reduce_ques, reduce_function);    
         // create two threads, each filling the queues with their own keys
         // first producer fills only even keys
         // second producers fills only odd keys
         vector<std::thread> producers;
         for (int i=0;i<num_producers;++i) {
-            producers.emplace_back(&fill_data, num_reduce, num_keys, num_val, &reduce_ques);
+            producers.emplace_back(&fill_data, num_reduce, num_keys, num_val, reduce_ques);
         }
         for(int i=0;i<num_producers;++i) {
             producers[i].join();
         }
     }
     // read the file and compare with desired values
-
     for (int r=0;r<num_reduce;++r) {
+        vector<pair<int, int>> storage;
         string file_name = "reduction_" + std::to_string(r);
         std::fstream file(file_name);
-        for(int k=0;k<num_keys/2;++k) {
+        for(int k=0;k<num_keys/num_reduce;++k) {
             int key;
             int val;
             file >> key >> val;
             // 0 / 2 + 0
             // 1 / 2 + 0
+            storage.emplace_back(key, val);
+        }
+        std::sort(storage.begin(), storage.end());
+        for(int k=0;k<num_keys/num_reduce;++k) {
+            int key = storage[k].first;
+            int val = storage[k].second;
             EXPECT_EQ(key, k*num_reduce + r);
             EXPECT_EQ(val, num_val*num_producers);
         }
@@ -132,22 +139,19 @@ TEST(Reducer, TwoTwo) {
 TEST(Reducer, MultMult) {
     int num_producers = 16;
     int num_reduce = 8;
-    vector<std::unique_ptr<reduce_queue>> reduce_ques;
+    std::shared_ptr<vector<reduce_queue>>    reduce_ques(std::make_shared<vector<reduce_queue>>(num_reduce));
     UserReduce reduce_function;
 
-    for(int i=0;i<num_reduce;++i) {
-        reduce_ques.emplace_back(std::make_unique<reduce_queue>());
-    }
     int num_keys = 800;
     int num_val = 100;
     {
-        DoReduce reduction_process(num_reduce, &reduce_ques, reduce_function);    
+        DoReduce reduction_process(num_reduce, reduce_ques, reduce_function);    
         // create two threads, each filling the queues with their own keys
         // first producer fills only even keys
         // second producers fills only odd keys
         vector<std::thread> producers;
         for (int i=0;i<num_producers;++i) {
-            producers.emplace_back(&fill_data, num_reduce, num_keys, num_val, &reduce_ques);
+            producers.emplace_back(&fill_data, num_reduce, num_keys, num_val, reduce_ques);
         }
         for(int i=0;i<num_producers;++i) {
             producers[i].join();
@@ -156,6 +160,7 @@ TEST(Reducer, MultMult) {
     // read the file and compare with desired values
 
     for (int r=0;r<num_reduce;++r) {
+        vector<pair<int, int>> storage;
         string file_name = "reduction_" + std::to_string(r);
         std::fstream file(file_name);
         for(int k=0;k<num_keys/num_reduce;++k) {
@@ -164,6 +169,12 @@ TEST(Reducer, MultMult) {
             file >> key >> val;
             // 0 / 2 + 0
             // 1 / 2 + 0
+            storage.emplace_back(key, val);
+        }
+        std::sort(storage.begin(), storage.end());
+        for(int k=0;k<num_keys/num_reduce;++k) {
+            int key = storage[k].first;
+            int val = storage[k].second;
             EXPECT_EQ(key, k*num_reduce + r);
             EXPECT_EQ(val, num_val*num_producers);
         }

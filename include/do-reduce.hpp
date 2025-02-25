@@ -9,16 +9,16 @@ class DoReduce {
 
 private:
 
-    int                   num_reducers_;
-    vector<std::atomic<bool>>          vec_map_finished_;
-    vector<std::thread>   rdsrs_;
-    vector<std::unique_ptr<reduce_queue>> *reduce_ques_;
+    int                                       num_reducers_;
+    vector<std::atomic<bool>>                 vec_map_finished_;
+    vector<std::thread>                       rdsrs_;
+    std::shared_ptr<vector<reduce_queue>>     reduce_ques_;
 
-    void reduction_worker(int, reduce_queue*, UserReduce, std::atomic<bool>&);
+    void reduction_worker(int, reduce_queue&, UserReduce, std::atomic<bool>&);
 
 public:
 
-    DoReduce(int, vector<std::unique_ptr<reduce_queue>>*,
+    DoReduce(int, const std::shared_ptr<vector<reduce_queue>>&,
              UserReduce);
 
     ~DoReduce();

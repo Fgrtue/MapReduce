@@ -18,6 +18,7 @@
 #include <memory>
 #include <unordered_map>
 #include <map>
+#include <assert.h>
 
 
 using std::string;

@@ -32,6 +32,8 @@ struct ConQueue {
     ConQueue() = default;
     ConQueue(const ConQueue&) = delete; 
     ConQueue& operator=(const ConQueue&) = delete;
+    ConQueue(ConQueue&&) = default;
+    ConQueue& operator=(ConQueue&&) = default;
 };
 
 template<class T>
