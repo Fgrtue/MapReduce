@@ -19,7 +19,7 @@
 */
 
 
-TEST(Reducer, OneTwo) {
+TEST(DoReduce, OneTwo) {
 
     // 1. Create reduce queues
     // 2. Create reduce_function
@@ -31,12 +31,11 @@ TEST(Reducer, OneTwo) {
 
     int num_reduce = 2;
     std::shared_ptr<vector<reduce_queue>>    reduce_ques(std::make_shared<vector<reduce_queue>>(num_reduce));
-    UserReduce reduce_function;
 
     int num_keys = 100;
     int num_val = 100;
     {
-        DoReduce reduction_process(num_reduce, reduce_ques, reduce_function);    
+        DoReduce reduction_process(num_reduce, reduce_ques);    
         vector<vector<int>> data(num_keys);
         for(int key=0;key<num_keys;++key) {
             for(int j=0;j<num_val;++j) {
@@ -91,17 +90,16 @@ void fill_data(int num_reduce, int num_keys, int num_val,
         }
 }
 
-TEST(Reducer, TwoTwo) {
+TEST(DoReduce, TwoTwo) {
 
     int num_producers = 2;
     int num_reduce = 2;
     std::shared_ptr<vector<reduce_queue>>    reduce_ques(std::make_shared<vector<reduce_queue>>(num_reduce));
-    UserReduce reduce_function;
 
     int num_keys = 100;
     int num_val = 100;
     {
-        DoReduce reduction_process(num_reduce, reduce_ques, reduce_function);    
+        DoReduce reduction_process(num_reduce, reduce_ques);    
         // create two threads, each filling the queues with their own keys
         // first producer fills only even keys
         // second producers fills only odd keys
@@ -136,16 +134,15 @@ TEST(Reducer, TwoTwo) {
     }
 } 
 
-TEST(Reducer, MultMult) {
+TEST(DoReduce, MultMult) {
     int num_producers = 16;
     int num_reduce = 8;
     std::shared_ptr<vector<reduce_queue>>    reduce_ques(std::make_shared<vector<reduce_queue>>(num_reduce));
-    UserReduce reduce_function;
 
     int num_keys = 800;
     int num_val = 100;
     {
-        DoReduce reduction_process(num_reduce, reduce_ques, reduce_function);    
+        DoReduce reduction_process(num_reduce, reduce_ques);    
         // create two threads, each filling the queues with their own keys
         // first producer fills only even keys
         // second producers fills only odd keys

@@ -33,16 +33,16 @@
 
 void Error(Err er_num, const char* msg);
 
+thread_local UserReduce DoReduce::reduce_func_;
 
-DoReduce::DoReduce(int num_reducers, const std::shared_ptr<vector<reduce_queue>>& reduce_ques,
-             UserReduce reduce_func_)
+DoReduce::DoReduce(int num_reducers, const std::shared_ptr<vector<reduce_queue>>& reduce_ques)
              : num_reducers_(num_reducers)
              , vec_map_finished_(num_reducers_)
              , reduce_ques_(reduce_ques)
 {   
     for(int i=0;i<num_reducers;++i) {
         vec_map_finished_[i].store(false);
-        rdsrs_.emplace_back(&DoReduce::reduction_worker, this, i, std::ref((*reduce_ques)[i]), reduce_func_, std::ref(vec_map_finished_[i]));
+        rdsrs_.emplace_back(&DoReduce::reduction_worker, this, i, std::ref((*reduce_ques)[i]), std::ref(vec_map_finished_[i]));
     }
 }
 
@@ -59,7 +59,7 @@ DoReduce::~DoReduce() {
     }
 }
 
-void DoReduce::reduction_worker(int num_rds, reduce_queue& q, UserReduce reduce_func_, std::atomic<bool>& map_fin) {
+void DoReduce::reduction_worker(int num_rds, reduce_queue& q, std::atomic<bool>& map_fin) {
 
     string name_file = "reduction_" + std::to_string(num_rds);
     std::ofstream file_reduce(name_file, std::ios::out | std::ios::trunc);

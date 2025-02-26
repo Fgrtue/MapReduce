@@ -18,6 +18,8 @@
 #include <memory>
 #include <unordered_map>
 #include <map>
+#include <sstream>
+#include <queue>
 #include <assert.h>
 
 
@@ -27,3 +29,4 @@ using std::vector;
 using std::pair;
 using std::array;
 using std::tuple;
+using std::deque;

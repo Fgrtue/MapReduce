@@ -14,8 +14,14 @@ public:
     using Value = V;
 
     vector<pair<Key, Value>> operator() (const string& key, const string& value) {
-        std::cout << key;
-        std::cout << value;
+        vector<pair<Key, Value>> ret;
+        std::stringstream data(value);
+        string str;
+        while(data >> str) {
+            if (str.empty()) break;
+            ret.emplace_back(key, std::stoi(str));
+        }
+        return ret;
     }
 
 };

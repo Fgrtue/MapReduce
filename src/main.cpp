@@ -55,12 +55,9 @@ int main(int argc, char* argv[]) {
         Error(Err::PARSING, "file must be in .json format");
     }
 
-    UserMap     map_function;
-    UserReduce  reduce_function;
-
     // Hash Function
     auto hash_reducer = [](const UserReduce::Key& key) {
-        static std::hash<UserReduce::Key> hasher;
+        thread_local std::hash<UserReduce::Key> hasher;
         return hasher(key) % parallelism_reduce;
     };
 
@@ -72,6 +69,6 @@ int main(int argc, char* argv[]) {
     std::shared_ptr<vector<reduce_queue>>    reduce_queues(std::make_shared<vector<reduce_queue>>(parallelism_reduce));
     std::shared_ptr<vector<map_queue>>      map_queues(std::make_shared<vector<map_queue>>(parallelism_map));
 
-    DoReduce reduction_process(parallelism_reduce, reduce_queues, reduce_function);
-    DoMap map_process(parallelism_map, parallelism_reduce, std::move(jobs), map_queues, reduce_queues, hash_reducer, map_function);
+    DoReduce reduction_process(parallelism_reduce, reduce_queues);
+    DoMap map_process(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer);
 }

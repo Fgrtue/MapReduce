@@ -13,13 +13,13 @@ private:
     vector<std::atomic<bool>>                 vec_map_finished_;
     vector<std::thread>                       rdsrs_;
     std::shared_ptr<vector<reduce_queue>>     reduce_ques_;
+    thread_local static UserReduce            reduce_func_;
 
-    void reduction_worker(int, reduce_queue&, UserReduce, std::atomic<bool>&);
+    void reduction_worker(int, reduce_queue&, std::atomic<bool>&);
 
 public:
 
-    DoReduce(int, const std::shared_ptr<vector<reduce_queue>>&,
-             UserReduce);
+    DoReduce(int, const std::shared_ptr<vector<reduce_queue>>&);
 
     ~DoReduce();
 };
