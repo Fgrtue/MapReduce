@@ -1,36 +1,5 @@
 #include "do-reduce.hpp"
 
-// 1. Reduce class has a:
-//      -> Constructor that takes an int, a hash function
-//      -> and vector with ConQueues
-//      -> variable atomic map_finish
-//      -> Vector with reducers
-//      -> Destructor
-// 2. Constructor
-//      -> Creates Reducers threads, calling a constructor for reduce
-//      -> providing every reducer its queue for jobs
-// 3. Destructor
-//      -> takes the lock to the map_finish
-//      -> sets map_finish
-//      -> walks through all the queues, gets the lock and wakes up all threads
-//      -> Joins all reducer threads
-// class ReduceWorker
-// 1. Receives queue into constructor
-//      -> creates a file with a name reduce_i
-//      -> In a while loop 
-//          -> takes the mutex
-//          -> it checks the work_finish variable
-//          -> checks the emptiness of the queue
-//          -> sleeps on cv in case the queue is empty
-//         -> it checks if queue is empty
-//              -> if not, takes and pops the next value
-//              -> Releases the lock
-//              -> Uses Reduce() (defined by user)
-//              -> writes to the file that it created
-//         -> takes the lock 
-//         ->  checks map_finish variable
-//              -> returns if it is true
-
 void Error(Err er_num, const char* msg);
 
 thread_local UserReduce DoReduce::reduce_func_;
@@ -74,13 +43,13 @@ void DoReduce::reduction_worker(int num_rds, reduce_queue& q, std::atomic<bool>&
         std::unique_lock<std::mutex> ul_(q.mt_);
         // wait on cv, in case map is still doing its work
         // and q is not empty
-        while(!map_fin.load() || q.empty()) {
+        while(!map_fin.load() && q.empty()) {
             q.cv_empty_.wait(ul_);
         }
         while (!q.empty()) {
             auto p = q.pop();
-            auto& key = p.first;
-            auto& val = p.second;
+            auto key = std::move(p.first);
+            auto val = std::move(p.second);
             ul_.unlock();
             auto output = reduce_func_(key, val);
             storage[output.first] += output.second;

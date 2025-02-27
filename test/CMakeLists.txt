@@ -20,3 +20,10 @@ target_link_libraries(test_map PRIVATE
     gtest_main
     MapReduce
 )
+
+add_executable(word_count word_count.cpp)
+
+target_link_libraries(word_count PRIVATE
+    gtest_main
+    MapReduce
+)

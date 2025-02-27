@@ -29,6 +29,8 @@ struct ConQueue {
     // Check for emptiness
     bool empty();
 
+    size_t size();
+
     ConQueue() = default;
     ConQueue(const ConQueue&) = delete; 
     ConQueue& operator=(const ConQueue&) = delete;
@@ -51,4 +53,9 @@ T ConQueue<T>::pop() {
 template<class T>
 bool ConQueue<T>::empty() {
     return data_.empty();
+}
+
+template<class T>
+size_t ConQueue<T>::size() {
+    return data_.size();
 }

@@ -6,6 +6,7 @@
 #include "do-reduce.hpp"
 #include "map-reduce-user.hpp"
 #include "con-queue.hpp"
+#include "timer.hpp"
 #include "error.hpp"
 
 // 1. Read the input as the name of the file
@@ -68,7 +69,11 @@ int main(int argc, char* argv[]) {
     // we will store vector of values for a specific key
     std::shared_ptr<vector<reduce_queue>>    reduce_queues(std::make_shared<vector<reduce_queue>>(parallelism_reduce));
     std::shared_ptr<vector<map_queue>>      map_queues(std::make_shared<vector<map_queue>>(parallelism_map));
-
-    DoReduce reduction_process(parallelism_reduce, reduce_queues);
-    DoMap map_process(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer);
+    Timer timer_;
+    {
+        DoReduce reduction_process(parallelism_reduce, reduce_queues);
+        DoMap map_process(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer);
+    }
+    auto elapsed = timer_.elapsed(); 
+    std::cout << "Total time of map-reduce " << elapsed << "ms"  << std::endl;
 }

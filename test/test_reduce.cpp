@@ -16,6 +16,27 @@
         -> check that reducers can perform their work normally
     3. Do the second case for 16 uploaders and 4 reducers
 
+    !!!WARNING!!!
+
+    Use the following Reduce function in map-reduce-user.hpp for correct tests:
+
+    template<class K, class V>
+    class Reduce {
+
+    public:
+        using Key   = K;
+        using Value = V;
+
+        pair<Key,Value> operator() (const Key& key, const vector<Value>& vec_values) {
+            int res = 0;
+            for(auto& elem : vec_values) {
+                res += elem;
+            }
+            return {key, res};
+        }
+
+    };
+
 */
 
 
