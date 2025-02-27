@@ -15,7 +15,6 @@ void do_word_count(queue<pair<string,string>>& jobs) {
         jobs.pop();
         auto value = std::move(job.second);
         string word;
-        std::cout << value << "\n";
         for(size_t i=0;i<value.size();++i) {
             if (!std::isspace(value[i]) && !std::ispunct(value[i])) {
                 word.push_back(std::tolower(value[i]));
