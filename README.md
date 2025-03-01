@@ -1,63 +1,38 @@
 # MapReduce
+
 This is my implementation of MadReduce programming model.
 
+The description of high-level idea behind this programming model is presented below.
 
-# Plan
+Let us first take a look at the structure of the project.
 
-1. Build MapReduce infrustructure that supports execution of user-defined Map() and Reduce() functions
+1. `/include'
+           - `map-reduce-user.hpp' -- the most important file for the user, since they can define their Map and Reduce functions (classes), as well as all the needed classes
+           - `reader.hpp` -- parsing part of the project
+           - `do-map.hpp` -- file for the class with the map process
+           - `do-reduce.hpp` -- file for the class with the reduce process
+           - `con-queue.hpp` -- a file for a wrapper for the queue, that contains mutex and condition variable
+           - `timer.hpp` -- class for benchmarking the execution of map-reduce process
 
-We always have to preprocess data for map: 
+2. `/src`
+           - `do-map.cpp` -- defines constructor, destructor and method for working threads
+           - `do-reduce.cpp` -- same as for map
+           - `reader.cpp`  -- defines constructor and method `parse` for getting the data with the library
+           - `error.cpp` -- a class for custom errors
+           - `timer.cpp` -- empty file, no need to pay attention
+3. `/test`
+           - `test_map.cpp`, `test_reader.cpp`, `test_reduce.cpp` -- self explanatory
+           - `word_count.cpp`, `sort.cpp` -- alternative direct algorithms without parallelization
+           - all `.json' files -- are used as samples for tests
 
-Master()
+# How to build? 
 
--> Starts a reader
-        Reader() -> opens the file that contains
-                 a json with key value pairs
-                 -> reads the keys and values as strings using reader threads
-                 -> let reader thread divide values into smaller chunks in case the data is too big
-                 -> Use CSV in order to separate the data into chunks of size of 1 KB or something like this (can be a constant)
-                 -> It assignes each key a unique identifier
+# How does Reader work?
 
--> Master starts threads
+# How does Map and Reduce work?
 
--> It assignes M map tasks to M` threads
+# What do the benchmarks show?
 
-        Map() -> take input pair key1 value1
-              -> perform some user defined operations to
-              -> produce some number of key2 value2
-              -> If list of values of key2 becomes too large
-              -> we use combiner to combine them (if the option enabled)
-              -> once produced some number of key2 value2 pairs
-              -> put the key2 along with values to the Reducer queue (depending on the hash function)
-              -> put them into the queue for Reducer (sort the values by reducer in adwace, to put them in batches)
+# What is the original idea behind MapReduce programming model?
 
--> It assignes R reduce tasks to R' threads
-        Reduce() -> take input pair key2 value2
-                 -> perform some taks to make key2 value
-                 -> when finished with the queue
-                 -> write all key values into some personal output file
-
-Interaction between Map threads and Reduce threads happens using the queues in which Map threads put their results, and from which Reduce threads take their task 
-
-2. Benchmark the 1) I/O phase
-                 2) Map phase
-                 3) Reduce phase
-                 4) See where code can be optimized
-
-## Plan 18.02
-
-- Define Error class ✔️
-- Provide definitions for Map and Reduce ✔️
-- Declare Reader class ✔️
-- Declare Do_Map class ✔️
-- Declare Do_Reduce class ✔️ 
-- Write a Make File ✔️
-
-- Write ConQueue ✔️
-- Write Read class
-        - check the library for parsing jsons
-        - find out what does parse function do
-        - what output does it give
-        - how to get the string from the values
-        - what would be the complexity of the tasks 
-- Test them
+# What is there still to improve? 
