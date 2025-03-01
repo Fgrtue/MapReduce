@@ -38,9 +38,9 @@
 
 void Error(Err,const char*);
 
-constexpr double map_coefficient = 10;
-constexpr double reduce_coefficient = 2.5;
-constexpr int    number_of_cores  = 8;
+constexpr double map_coefficient = 1;
+constexpr double reduce_coefficient = 1;
+constexpr int    number_of_cores  = 4;
 constexpr int    parallelism_map  = static_cast<int>(map_coefficient * number_of_cores);
 constexpr int    parallelism_reduce  = static_cast<int>(reduce_coefficient * number_of_cores);
 

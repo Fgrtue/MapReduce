@@ -58,5 +58,5 @@ int main(int argc, char* argv[]) {
         do_word_count(jobs);
     }
     auto elapsed = timer_.elapsed(); 
-    std::cout << "Total time of map-reduce " << elapsed << "ms"  << std::endl;
+    std::cout << "Total time of direct word count " << elapsed << "ms"  << std::endl;
 }

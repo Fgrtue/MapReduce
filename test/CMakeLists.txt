@@ -27,3 +27,10 @@ target_link_libraries(word_count PRIVATE
     gtest_main
     MapReduce
 )
+
+add_executable(sort sort.cpp)
+
+target_link_libraries(sort PRIVATE
+    gtest_main
+    MapReduce
+)

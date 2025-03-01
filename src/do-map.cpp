@@ -20,20 +20,22 @@ DoMap::DoMap(int num_map, int num_reduce, queue<pair<string,string>>& queue_jobs
     size_t chunk_of_work = (num_map_ ? total_work / num_map_ : 0);
     size_t remainder_work = (num_map ? total_work % num_map_ : 0);
 
-
-    for(int job_num = 0; job_num < total_work; ++job_num) {
-        int worker_ind = (job_num % num_map_);
-        auto& q = (*map_queues_)[worker_ind];
-        q.push(queue_jobs.front());
-        queue_jobs.pop();
-    }
-
     for(int i=0;i<num_map;++i) {
         auto& q = (*map_queues_)[i];
         std::lock_guard<std::mutex> lg_(q.mt_);
         work_to_do_[i] = chunk_of_work + (i < remainder_work ? 1 : 0);
         map_workers_.emplace_back(&DoMap::map_worker, this, i);
     }
+
+    for(int job_num = 0; job_num < total_work; ++job_num) {
+        int worker_ind = (job_num % num_map_);
+        auto& q = (*map_queues_)[worker_ind];
+        std::lock_guard lg_(q.mt_);
+        q.push(queue_jobs.front());
+        q.cv_empty_.notify_one();
+        queue_jobs.pop();
+    }
+
 }
 
 DoMap::~DoMap() {
@@ -51,7 +53,7 @@ DoMap::~DoMap() {
 
 void DoMap::map_worker(int w) {
 
-    const int MAX_SZ = 512;
+    const int MAX_SZ = 2048;
     key_vvalues.reserve(MAX_SZ);
     ready_send.resize(num_reducers_);
     for(int i=0; i < num_map_;++i) {
@@ -74,6 +76,7 @@ void DoMap::map_worker(int w) {
             }
             if(work_to_do_[ind] == 0) {
                 q.cv_empty_.notify_all();
+                ul_.unlock();
                 Send(store);
                 break;
             }

@@ -61,6 +61,5 @@ void DoReduce::reduction_worker(int num_rds, reduce_queue& q, std::atomic<bool>&
     }
     for(auto& [key,value] : storage) {
         file_reduce << key << " " << value << "\n";
-        file_reduce.flush();
     }
 }
