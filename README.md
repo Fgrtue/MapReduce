@@ -7,12 +7,12 @@ The description of high-level idea behind this programming model is presented be
 Let us first take a look at the structure of the project.
 
 1. `/include'
-           - `map-reduce-user.hpp' -- the most important file for the user, since they can define their Map and Reduce functions (classes), as well as all the needed classes
-           - `reader.hpp` -- parsing part of the project
-           - `do-map.hpp` -- file for the class with the map process
-           - `do-reduce.hpp` -- file for the class with the reduce process
-           - `con-queue.hpp` -- a file for a wrapper for the queue, that contains mutex and condition variable
-           - `timer.hpp` -- class for benchmarking the execution of map-reduce process
+   - `map-reduce-user.hpp` -- the most important file for the user, since they can define their Map and Reduce functions (classes), as well as all the needed classes
+   - `reader.hpp` -- parsing part of the project
+   - `do-map.hpp` -- file for the class with the map process
+   - `do-reduce.hpp` -- file for the class with the reduce process
+   - `con-queue.hpp` -- a file for a wrapper for the queue, that contains mutex and condition variable
+   - `timer.hpp` -- class for benchmarking the execution of map-reduce process
 
 2. `/src`
            - `do-map.cpp` -- defines constructor, destructor and method for working threads
