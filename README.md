@@ -31,7 +31,7 @@ To build the project you need a library for convenient and easy parsing of `.jso
 
 `https://github.com/nlohmann/json`
 
-After building this library, rename the folder `nlohmann_json` so the dependencies are correct in CMakeLists.txt. 
+After building this library, check that the folder is called `json` so the dependencies are correct in CMakeLists.txt. 
 
 Then do the following in the root of the directory:
 
