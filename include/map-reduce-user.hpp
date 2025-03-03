@@ -6,47 +6,29 @@ using std::string;
 using std::vector;
 using std::pair;
 
+/*
 //    TEST1 COUNTING WORDS
     
-//     template<class K, class V>
-// class Map {
-
-// public:
-//     using Key   = K;
-//     using Value = V;
-
-//     vector<pair<Key, Value>> operator() (const string& key, const string& value) {
-//         vector<pair<Key, Value>> ret;
-//         string word;
-//         for(size_t i=0;i<value.size();++i) {
-//             if (!std::isspace(value[i]) && !std::ispunct(value[i]) ) {
-//                 word.push_back(std::tolower(value[i]));
-//             } else {
-//                 ret.push_back({word, 1});
-//                 word.clear();
-//             }
-//         }
-//         if (!word.empty()) ret.push_back({word, 1});
-
-//         return ret;
-//     }
-
-// };
-
 template<class K, class V>
 class Map {
-public:
 
+public:
     using Key   = K;
     using Value = V;
 
     vector<pair<Key, Value>> operator() (const string& key, const string& value) {
         vector<pair<Key, Value>> ret;
-        std::stringstream data(value);
-        int num;
-        while(data >> num) {
-            ret.emplace_back(key, num);
+        string word;
+        for(size_t i=0;i<value.size();++i) {
+            if (!std::isspace(value[i]) && !std::ispunct(value[i]) ) {
+                word.push_back(std::tolower(value[i]));
+            } else {
+                ret.push_back({word, 1});
+                word.clear();
+            }
         }
+        if (!word.empty()) ret.push_back({word, 1});
+
         return ret;
     }
 };
@@ -70,8 +52,7 @@ public:
 
 using UserMap = Map<std::string, int>;
 using UserReduce = Reduce<std::string, int>;
-
-
+*/
 /*
 //    TEST2 SORTING
 
