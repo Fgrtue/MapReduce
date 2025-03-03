@@ -16,7 +16,7 @@ queue<pair<string,string>> Reader::parse() {
     json content;
     try {
         content = json::parse(input_file);
-    } catch (const std::runtime_error& e) {
+    } catch (const nlohmann::json::parse_error& e) {
         Error(Err::PARSING, e.what());
     }
 

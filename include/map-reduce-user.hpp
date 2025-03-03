@@ -7,7 +7,7 @@ using std::vector;
 using std::pair;
 
 /*
-    TEST1 COUNTING WORDS
+//    TEST1 COUNTING WORDS
     
     template<class K, class V>
 class Map {
@@ -57,8 +57,7 @@ using UserReduce = Reduce<std::string, int>;
 */
 
 /*
-
-    TEST2 SORTING
+//    TEST2 SORTING
 
 template<class K, class V>
 class Map {
@@ -94,6 +93,8 @@ public:
 
 using UserMap = Map<int, int>;
 using UserReduce = Reduce<int, int>;
+*/
+
 
 // Observe: parameters of map_queue cannot be changes, since we assume that
 // we work with strings as values 
@@ -101,4 +102,3 @@ using map_queue    = ConQueue<pair<std::string, std::string>>;
 using vred_val     = vector<UserReduce::Value>;
 using reduce_queue = ConQueue<pair<UserReduce::Key, vred_val>>;
 
-*/

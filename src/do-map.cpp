@@ -53,7 +53,7 @@ DoMap::~DoMap() {
 
 void DoMap::map_worker(int w) {
 
-    const int MAX_SZ = 2048;
+    const int MAX_SZ = 257'664;
     key_vvalues.reserve(MAX_SZ);
     ready_send.resize(num_reducers_);
     for(int i=0; i < num_map_;++i) {
@@ -63,9 +63,10 @@ void DoMap::map_worker(int w) {
 
             std::unique_lock ul_(q.mt_);
             q.cv_empty_.wait(ul_, [&] { return work_to_do_[ind] == 0 || !q.empty(); });
+            int done_work = 0;
             while(!q.empty()) {
                 auto job = q.pop();
-                work_to_do_[ind]--;
+                done_work++;
                 ul_.unlock();
                 auto output = map_func_(job.first, job.second);
                 store.insert(store.end(), output.begin(), output.end());
@@ -74,6 +75,7 @@ void DoMap::map_worker(int w) {
                 }
                 ul_.lock();
             }
+            work_to_do_[ind] -= done_work;
             if(work_to_do_[ind] == 0) {
                 q.cv_empty_.notify_all();
                 ul_.unlock();

@@ -56,6 +56,18 @@ TEST(Parser, ErrorFormat) {
     }
 }
 
+TEST(Parser, FormatError) {
+
+    std::string file_name = "../test/reader_test0.json";
+    try {
+        Reader reader(file_name);
+        auto q = reader.parse();
+        EXPECT_TRUE(false);
+    } catch (const std::runtime_error& e) {
+        EXPECT_TRUE(true);
+    }
+}
+
 TEST(Parser, FormatShort) {
 
     std::string file_name = "../test/reader_test2.json";

@@ -75,5 +75,5 @@ int main(int argc, char* argv[]) {
         DoMap map_process(parallelism_map, parallelism_reduce, jobs, map_queues, reduce_queues, hash_reducer);
     }
     auto elapsed = timer_.elapsed(); 
-    std::cout << "Total time of map-reduce " << elapsed << "ms"  << std::endl;
+    std::cout << "Total time of map-reduce " << elapsed << "µs"  << std::endl;
 }

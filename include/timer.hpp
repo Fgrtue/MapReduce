@@ -20,7 +20,7 @@ struct Timer {
     
     long long elapsed() {
 
-        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count();
     }
 
     time_pt start;

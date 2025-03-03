@@ -11,12 +11,14 @@ void do_word_count(queue<pair<string,string>>& jobs) {
 
     std::vector<int> vec;
     vec.reserve(1e7);
-    auto job = jobs.front();
-    jobs.pop();
-    std::stringstream s(job.second);
-    int num;
-    while(s >> num) {
-        vec.push_back(num);
+    while(!jobs.empty()) {
+        auto job = jobs.front();
+        jobs.pop();
+        std::stringstream s(job.second);
+        int num;
+        while(s >> num) {
+            vec.push_back(num);
+        }
     }
     std::sort(vec.begin(), vec.end());
     std::ofstream file_reduce("sort_test", std::ios::out | std::ios::trunc);
@@ -51,5 +53,5 @@ int main(int argc, char* argv[]) {
         do_word_count(jobs);
     }
     auto elapsed = timer_.elapsed(); 
-    std::cout << "Total time of direct word count " << elapsed << "ms"  << std::endl;
+    std::cout << "Total time of direct sort " << elapsed << "µs"  << std::endl;
 }
