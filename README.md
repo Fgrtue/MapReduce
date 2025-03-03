@@ -2,7 +2,7 @@
 
 This is my implementation of MadReduce programming model.
 
-The description of the high-level idea behind this programming model is presented below.
+The description of the high-level idea behind this programming model is presented in the last paragraph.
 
 Let us first take a look at the structure of the project.
 
