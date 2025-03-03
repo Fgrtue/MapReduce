@@ -27,7 +27,7 @@ FetchContent_MakeAvailable(googletest)
 add_subdirectory(test)
 
 # add nlohmann/json library
-add_subdirectory(nlohmann_json)
+add_subdirectory(json)
 
 # 9. Define library header
 set(HEADERS 

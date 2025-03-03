@@ -117,7 +117,7 @@ private:
     thread_local static std::unordered_map<UserReduce::Key, vred_val>         key_vvalues;
     thread_local static vector<vector<pair<UserReduce::Key, vred_val>>>       ready_send;
 
-    void Send(deque<pair<UserReduce::Key, UserReduce::Value>>&);
+    void Send();
 
     void map_worker(int);
 

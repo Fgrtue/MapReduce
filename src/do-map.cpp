@@ -13,7 +13,7 @@ DoMap::DoMap(int num_map, int num_reduce, queue<pair<string,string>>& queue_jobs
 , num_reducers_(num_reduce)
 , map_queues_(map_queues)
 , reduce_queues_(reduce_queues)
-, hash_reduce_(std::move(hash_reduce))
+, hash_reduce_(hash_reduce)
 , work_to_do_(num_map_)
 {
     size_t total_work = queue_jobs.size();
@@ -42,12 +42,11 @@ DoMap::~DoMap() {
 
     for(int i=0; i<num_map_;++i) {
         auto& q = (*map_queues_)[i];
-        std::unique_lock ul_(q.mt_);
-        q.cv_empty_.notify_all();
+        std::unique_lock<std::mutex> ul_(q.mt_);
+        q.cv_empty_.notify_one();
     }
     for(int i=0; i<num_map_;++i) {
         map_workers_[i].join();
-        assert(work_to_do_[i] == 0);
     }
 }
 
@@ -61,9 +60,13 @@ void DoMap::map_worker(int w) {
         auto& q = (*map_queues_)[ind];
         while (true) {
 
-            std::unique_lock ul_(q.mt_);
-            q.cv_empty_.wait(ul_, [&] { return work_to_do_[ind] == 0 || !q.empty(); });
+            std::unique_lock<std::mutex> ul_(q.mt_);
+            while(work_to_do_[ind] != 0 && q.empty()) {
+                q.cv_empty_.wait(ul_);
+            }
+
             int done_work = 0;
+
             while(!q.empty()) {
                 auto job = q.pop();
                 done_work++;
@@ -71,7 +74,7 @@ void DoMap::map_worker(int w) {
                 auto output = map_func_(job.first, job.second);
                 store.insert(store.end(), output.begin(), output.end());
                 if(MAX_SZ <= store.size()) {
-                    Send(store);
+                    Send();
                 }
                 ul_.lock();
             }
@@ -79,7 +82,7 @@ void DoMap::map_worker(int w) {
             if(work_to_do_[ind] == 0) {
                 q.cv_empty_.notify_all();
                 ul_.unlock();
-                Send(store);
+                Send();
                 break;
             }
         }
@@ -87,28 +90,30 @@ void DoMap::map_worker(int w) {
     }
 }
 
-void DoMap::Send(deque<pair<UserReduce::Key, UserReduce::Value>>& store) {
+void DoMap::Send() {
     if (store.empty()) return ;
 
     while(!store.empty()) {
         // 1. put kets inside the key_values
         auto elem = store.front();
+        key_vvalues[elem.first].push_back(elem.second);
         store.pop_front();
-        key_vvalues[elem.first].push_back(std::move(elem.second));
     }
     // 2. for each key find out where it is from and insert them into the ready_send
     for(auto& it : key_vvalues) {
+        if (it.second.empty()) continue;
         int key_num = hash_reduce_(it.first);
-        ready_send[key_num].push_back(std::move(it));
-        it.second.clear(); 
+        ready_send[key_num].push_back(it);
+        it.second.clear();
     } 
     // 3. then send the values to the reducer for each reducer one by one
     for(int rdsr = 0; rdsr < num_reducers_;++rdsr) {
         if (ready_send[rdsr].empty()) continue; 
         auto& q = (*reduce_queues_)[rdsr];
-        std::lock_guard<std::mutex> lg(q.mt_);
+        std::lock_guard lg(q.mt_);
         while(!ready_send[rdsr].empty()) {
-            q.push(std::move(ready_send[rdsr].back()));
+            q.push(ready_send[rdsr].back());
+            // std::cout << "R = " << rdsr << " pushed " << ready_send[rdsr].back().first << " of size " << ready_send[rdsr].back().second.size() << "\n";
             ready_send[rdsr].pop_back();
         }
         q.cv_empty_.notify_one();

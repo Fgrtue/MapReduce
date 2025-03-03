@@ -208,7 +208,8 @@ TEST(DoMap, FinishEarlyNoContention) {
         while(!q.empty()) {
             auto [k, vec_v] = q.pop();
             int even_key_out = std::stoi(k) % num_reduce;
-            EXPECT_EQ(r%num_reduce, even_key_out);
+            EXPECT_EQ(r, even_key_out);
+            ASSERT_EQ(vec_v.size(), num_values) << "Mismatch in vector size for key " << k;
             for(int j=0;j<num_values;++j) {
                 EXPECT_EQ(j, vec_v[j]);
             }
