@@ -96,7 +96,7 @@ void DoMap::Send() {
     while(!store.empty()) {
         // 1. put kets inside the key_values
         auto elem = store.front();
-        key_vvalues[elem.first].push_back(elem.second);
+        key_vvalues[elem.first].push_back(std::move(elem.second));
         store.pop_front();
     }
     // 2. for each key find out where it is from and insert them into the ready_send
@@ -112,7 +112,7 @@ void DoMap::Send() {
         auto& q = (*reduce_queues_)[rdsr];
         std::lock_guard lg(q.mt_);
         while(!ready_send[rdsr].empty()) {
-            q.push(ready_send[rdsr].back());
+            q.push(std::move(ready_send[rdsr].back()));
             // std::cout << "R = " << rdsr << " pushed " << ready_send[rdsr].back().first << " of size " << ready_send[rdsr].back().second.size() << "\n";
             ready_send[rdsr].pop_back();
         }
